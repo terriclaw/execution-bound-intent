@@ -19,6 +19,8 @@ This gap creates exploitable surface in delegated systems:
 
 This standard defines a canonical commitment scheme where the signed authorization and the executed call must be identical.
 
+Policy systems validate intent classes; this standard validates exact execution instances.
+
 ## Specification
 
 The key words MUST, MUST NOT, REQUIRED, SHALL, SHALL NOT, SHOULD, SHOULD NOT, RECOMMENDED, MAY, and OPTIONAL in this document are to be interpreted as described in RFC 2119.
@@ -101,7 +103,7 @@ At redemption, an enforcer MUST verify all of the following, in order:
 7. Signature is valid over the EIP-712 digest for signer (EOA or ERC-1271)
 8. Mark usedNonces[intent.account][signer][intent.nonce] = true
 
-The enforcer MUST revert if any condition fails. The nonce MUST be consumed only after successful signature verification.
+The enforcer MUST revert if any condition fails. The nonce MUST be checked as unused before signature verification AND marked used only after successful verification. Implementations MUST NOT consume the nonce on signature failure.
 
 ### Nonce Model
 ```solidity
@@ -116,7 +118,9 @@ Implementations MUST support EOA signatures via ecrecover and ERC-1271 smart con
 
 ### Calldata Encoding
 
-When used with ERC-7579-compatible execution frameworks, execution.callData MUST be extracted from the packed execution envelope:
+execution.callData MUST refer strictly to the calldata of the call being executed, excluding any wrapper or envelope encoding used by the execution framework.
+
+When used with ERC-7579-compatible execution frameworks, callData is extracted from the packed execution envelope as follows:
 
     executionCalldata = abi.encodePacked(target, value, callData)
 
@@ -126,7 +130,7 @@ dataHash MUST be keccak256(callData), not keccak256(executionCalldata).
 
 ## Rationale
 
-### Why full execution commitment only
+### Scope: full execution commitment only
 
 Partial commitment modes (selector-only, value-range, target-only) are expressible as weaker caveats in existing systems. This standard defines only the strongest form: full equality. Weaker forms are out of scope and may be defined in separate ERCs.
 
