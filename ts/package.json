@@ -1,0 +1,16 @@
+{
+  "name": "execution-bound-intent-ts",
+  "version": "0.1.0",
+  "description": "Reference TypeScript builder for ExecutionIntent",
+  "type": "module",
+  "scripts": {
+    "example": "tsx example.ts"
+  },
+  "dependencies": {
+    "viem": "^2.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}
