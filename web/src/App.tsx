@@ -3,7 +3,7 @@ import {
   buildIntent, buildMutatedIntent, computeIntentDigest, simulateSignature,
   encodeTransfer, shortHex, formatAmount,
   type RunParams,
-} from './lib/intent'
+} from './lib/intent.js'
 
 const DEFAULT_PARAMS: RunParams = {
   account:   '0xA1ceA1ceA1ceA1ceA1ceA1ceA1ceA1ceA1ceA1ce',
