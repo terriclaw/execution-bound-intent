@@ -7,3 +7,6 @@
 [submodule "lib/erc7579-implementation"]
 	path = lib/erc7579-implementation
 	url = https://github.com/erc7579/erc7579-implementation
+[submodule "lib/delegation-framework"]
+	path = lib/delegation-framework
+	url = https://github.com/MetaMask/delegation-framework

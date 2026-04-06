@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.23;
 
 import { ExecutionLib } from "@erc7579/lib/ExecutionLib.sol";
 import { SignatureChecker } from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
@@ -42,6 +42,17 @@ contract ExecutionBoundCaveat {
             )
         );
     }
+
+    /// @notice Called by DelegationManager before all hooks in a batch. No-op in v1.
+    function beforeAllHook(
+        bytes calldata,
+        bytes calldata,
+        bytes32,
+        bytes calldata,
+        bytes32,
+        address,
+        address
+    ) external {}
 
     /// @notice Called by DelegationManager before execution.
     /// @param _terms    Unused in v1. Pass empty bytes.
@@ -97,6 +108,28 @@ contract ExecutionBoundCaveat {
         usedNonces[intent.account][signer][intent.nonce] = true;
         emit NonceConsumed(intent.account, signer, intent.nonce);
     }
+
+    /// @notice No-op afterHook — v1 only enforces in beforeHook.
+    function afterHook(
+        bytes calldata,
+        bytes calldata,
+        bytes32,
+        bytes calldata,
+        bytes32,
+        address,
+        address
+    ) external {}
+
+    /// @notice No-op afterAllHook — v1 only enforces in beforeHook.
+    function afterAllHook(
+        bytes calldata,
+        bytes calldata,
+        bytes32,
+        bytes calldata,
+        bytes32,
+        address,
+        address
+    ) external {}
 
     function intentDigest(ExecutionIntent calldata intent) external view returns (bytes32) {
         return intent.digest(DOMAIN_SEPARATOR);
