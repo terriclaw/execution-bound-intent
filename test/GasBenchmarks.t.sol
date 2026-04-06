@@ -69,7 +69,7 @@ contract GasBenchmarks is Test {
         boundCaveat.beforeHook("", abi.encode(intent, signer, _sign(intent)), bytes32(0), ExecutionLib.encodeSingle(target, 0, calldata_), bytes32(0), account, redeemer);
     }
 
-    function _hookSelector(bytes memory calldata_) internal {
+    function _hookSelector(bytes memory calldata_) internal view {
         selectorOnly.beforeHook(abi.encodePacked(bytes4(calldata_)), "", bytes32(0), ExecutionLib.encodeSingle(target, 0, calldata_), bytes32(0), account, redeemer);
     }
 
