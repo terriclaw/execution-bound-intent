@@ -169,6 +169,7 @@ export default function App() {
         </div>
 
         <div className="mb-10">
+          <p className="text-xs font-mono text-zinc-500 mb-6">Step through the flow with Next, or hit Run Demo to auto-play. Use Custom Params to run it with your own values.</p>
           <div className="flex items-center gap-0 mb-8">
             {STEPS.map((step, i) => (
               <div key={step.id} className="flex items-center">
