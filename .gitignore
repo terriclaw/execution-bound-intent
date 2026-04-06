@@ -1,4 +1,6 @@
 out/
 cache/
-lib/
 .env
+/lib/
+web/node_modules/
+web/dist/
