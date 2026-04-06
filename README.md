@@ -156,7 +156,7 @@ Benchmarked against a selector-only baseline enforcer.
 
 Overhead is flat across calldata sizes. Cost is dominated by EIP-712 digest construction and ecrecover (~45k gas), not calldata hashing. keccak256 of calldata is cheap.
 
-See: [`test/GasBenchmarks.t.sol`](./test/GasBenchmarks.t.sol)
+See: [`[`test/GasBenchmarks.t.sol`](./test/GasBenchmarks.t.sol)`](./[`test/GasBenchmarks.t.sol`](./test/GasBenchmarks.t.sol))
 
 ## Setup
 
@@ -165,6 +165,10 @@ See: [`test/GasBenchmarks.t.sol`](./test/GasBenchmarks.t.sol)
     forge install erc7579/erc7579-implementation
     forge build
     forge test
+
+## Scope
+
+Designed for payment and execution paths where exactness is required. Not intended for flexible agent decision layers or policy-based authorization.
 
 ## Deferred (not v1)
 
