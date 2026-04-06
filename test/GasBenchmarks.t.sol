@@ -76,7 +76,7 @@ contract GasBenchmarks is Test {
     function test_gas_bound_smallCalldata() public { _hookBound(_smallCalldata(), 0); }
     function test_gas_bound_mediumCalldata() public { _hookBound(_mediumCalldata(), 1); }
     function test_gas_bound_largeCalldata() public { _hookBound(_largeCalldata(), 2); }
-    function test_gas_selector_smallCalldata() public { _hookSelector(_smallCalldata()); }
-    function test_gas_selector_mediumCalldata() public { _hookSelector(_mediumCalldata()); }
-    function test_gas_selector_largeCalldata() public { _hookSelector(_largeCalldata()); }
+    function test_gas_selector_smallCalldata() public view { _hookSelector(_smallCalldata()); }
+    function test_gas_selector_mediumCalldata() public view { _hookSelector(_mediumCalldata()); }
+    function test_gas_selector_largeCalldata() public view { _hookSelector(_largeCalldata()); }
 }
