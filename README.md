@@ -25,6 +25,26 @@ delegator = the smart account executing via DelegationManager (passed as _delega
 
 execution.callData refers only to the function calldata, not the full packed execution envelope.
 
+## Example
+
+    ExecutionIntent:
+      account:  0xAlice
+      target:   0xUSDC
+      value:    0
+      dataHash: keccak256(transfer(0xBob, 100e6))
+      nonce:    1
+      deadline: 0
+
+    Result:
+      transfer(0xBob, 100e6)  -> pass
+      transfer(0xBob, 101e6)  -> revert (dataHash mismatch)
+      transfer(0xEve, 100e6)  -> revert (dataHash mismatch)
+      approve(0xEve, 100e6)   -> revert (dataHash mismatch)
+      same intent submitted twice -> revert (nonce already used)
+
+Modifying a single byte of calldata causes a DataHashMismatch revert.
+The commitment is to exact bytes, not to intent or meaning.
+
 ## Flow
 
     1. signer builds ExecutionIntent
