@@ -3,6 +3,12 @@
 This document shows how to wire ExecutionBoundCaveat into a MetaMask
 delegation-framework redemption as a caveat.
 
+## Reference integration test
+
+[`test/IntegrationFlow.t.sol`](./test/IntegrationFlow.t.sol) calls `beforeHook` exactly as `DelegationManager` would — same args encoding, same executionCalldata, same mode byte. It proves exact execution passes and mutated execution reverts at the caveat boundary.
+
+This test does not include the full delegation signature validation or `executeFromExecutor` pipeline. Those are `DelegationManager`'s jurisdiction. The caveat enforcement surface is fully covered.
+
 ## Signer vs delegator
 
 The signer may differ from the delegator. The signature authorizes the execution; the delegator account executes it. A session key, agent, or co-signer may sign on behalf of the delegating smart account.

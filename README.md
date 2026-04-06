@@ -176,6 +176,14 @@ This cost profile favors high-value, low-frequency execution paths.
 
 See: [`test/GasBenchmarks.t.sol`](./test/GasBenchmarks.t.sol)
 
+## Integration flow
+
+[`test/IntegrationFlow.t.sol`](./test/IntegrationFlow.t.sol) exercises the same `beforeHook` path that `DelegationManager` calls at redemption time — same args encoding, same `ExecutionLib.encodeSingle` executionCalldata, same mode byte.
+
+Five cases: exact execution passes, mutated calldata reverts, wrong account reverts, nonce lifecycle verified, delegatecall rejected.
+
+This validates enforcement at the DelegationManager boundary. A full live redemption flow (HybridDeleGator + `redeemDelegations`) is the next step.
+
 ## Setup
 
     forge install foundry-rs/forge-std
