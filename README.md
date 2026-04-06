@@ -13,6 +13,8 @@ A terminal enforcement primitive for delegated execution.
 
 Authorization is reduced to byte-level equality, eliminating policy interpretation.
 
+Enforced at redemption time inside the DelegationManager caveat hook.
+
 A canonical equality-based caveat for execution commitment.
 
 ## Why this matters
@@ -36,6 +38,7 @@ See: [`test/RelayerMutationDemo.t.sol`](./test/RelayerMutationDemo.t.sol)
 ## What this is
 
 Not a policy engine. A byte-level commitment check.
+It verifies that execution exactly matches what was signed.
 
 delegator = the smart account executing via DelegationManager (passed as _delegator in the caveat hook)
 
