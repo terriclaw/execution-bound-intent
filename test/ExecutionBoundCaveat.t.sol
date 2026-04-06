@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.23;
+pragma solidity ^0.8.24;
 
 import { Test } from "forge-std/Test.sol";
 import { ExecutionBoundCaveat, Execution } from "../src/ExecutionBoundCaveat.sol";
@@ -12,12 +12,13 @@ contract ExecutionBoundCaveatTest is Test {
 
     uint256 signerKey = 0xA11CE;
     address signer;
-    address account   = address(0xACC0);
-    address redeemer  = address(0xCA11);
-    address target    = address(0xBEEF);
+    address account  = address(0xACC0);
+    address redeemer = address(0xCA11);
+    address target   = address(0xBEEF);
     bytes32 domainSep;
 
     function setUp() public {
+        vm.warp(1_000_000);
         caveat = new ExecutionBoundCaveat();
         signer = vm.addr(signerKey);
         domainSep = caveat.DOMAIN_SEPARATOR();
