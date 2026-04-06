@@ -1,4 +1,10 @@
 {
+  "lib/delegation-framework": {
+    "tag": {
+      "name": "v1.3.0",
+      "rev": "bfbdf9795a976833ed2fa000baf42fbb83958b03"
+    }
+  },
   "lib/erc7579-implementation": {
     "tag": {
       "name": "v0.0.2",
