@@ -13,6 +13,24 @@ Authorization is reduced to byte-level equality, eliminating policy interpretati
 
 A canonical equality-based caveat for execution commitment.
 
+## Why this matters
+
+Policy-based caveats allow silent parameter mutation.
+
+Example: a selector-only check (AllowedMethods) allows a relayer to change the recipient or amount while still passing validation. The selector matches — the parameters are never checked.
+
+execution-bound-intent prevents this by enforcing exact calldata equality at runtime.
+
+    Policy checks:     "is this allowed?"
+    Execution-bound:   "is this exactly what was signed?"
+
+See: test/RelayerMutationDemo.t.sol
+
+    test_policyEnforcer_allowsRelayerMutation  -> mutation passes silently
+    test_executionBoundCaveat_blocksRelayerMutation -> DataHashMismatch revert
+
+
+
 ## What this is
 
 Most delegation and permission systems ask: is this action allowed?
