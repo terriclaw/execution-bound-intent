@@ -11,11 +11,13 @@ A terminal enforcement primitive for delegated execution.
     AND execution.value           == intent.value
     AND intent.account            == _delegator
 
-Authorization is enforced via byte-level equality of the committed execution.
+Execution is authorized only if signature validity and byte-level equality both hold.
 
 Enforced at redemption time inside the DelegationManager caveat hook.
 
 No partial matches. No parameter tolerance. Equality is strict.
+
+Any transformation between signing and execution invalidates the transaction.
 
 target, value, and calldata are all part of the signed commitment.
 
@@ -25,7 +27,7 @@ Policy-based caveats can allow silent parameter mutation.
 
 A selector-only check (e.g. AllowedMethods) verifies the function, but not the parameters. A relayer can change the recipient or amount while still passing validation.
 
-execution-bound-intent prevents this by enforcing exact calldata equality at runtime — any deviation reverts.
+execution-bound-intent enforces exact calldata equality at runtime; any deviation reverts.
 
     Policy checks:     "is this allowed?"
     Execution-bound:   "is this exactly what was signed?"
@@ -44,7 +46,7 @@ It verifies that execution exactly matches what was signed.
 
 delegator = the smart account executing via DelegationManager (passed as _delegator in the caveat hook)
 
-execution.callData is extracted from the packed execution via ERC-7579 ExecutionLib.decodeSingle() and refers only to the function calldata (not the packed envelope). Assumes single-call execution encoding — multicall not supported in v1.
+execution.callData includes the full function selector and arguments, but excludes target and value (each checked separately). Extracted via ERC-7579 ExecutionLib.decodeSingle(). Assumes single-call execution encoding — multicall not supported in v1.
 
 ## Example
 
@@ -70,14 +72,18 @@ The commitment is to exact bytes, not to intent or meaning.
 
 The signer may be distinct from the delegating account (`_delegator`). Authorization is via signature; execution is via account. A session key, agent, or co-signer may sign on behalf of the delegating smart account.
 
+## Signature domain
+
+Signature domain includes chainId and verifying contract address, preventing cross-domain replay without additional coordination.
+
 ## Flow
 
     1. signer builds ExecutionIntent
-    2. authorized signer signs EIP-712 digest bound to (account, target, value, calldata)
+    2. authorized signer signs EIP-712 digest bound to (account, target, value, calldata, nonce, deadline)
     3. intent + sig passed as caveat args at redemption
     4. execution submitted via DelegationManager
     5. caveat decodes real calldata via ExecutionLib.decodeSingle()
-    6. caveat recomputes hash + verifies signature
+    6. caveat checks nonce, recomputes hash, verifies signature
     7. equality holds -> execute; else revert
 
 ## The struct
