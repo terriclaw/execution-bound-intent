@@ -4,3 +4,4 @@ cache/
 /lib/
 web/node_modules/
 web/dist/
+ts/node_modules/
