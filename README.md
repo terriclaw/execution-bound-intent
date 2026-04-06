@@ -31,6 +31,25 @@ See: test/RelayerMutationDemo.t.sol
 
 
 
+## Why this matters
+
+Policy-based caveats can allow silent parameter mutation.
+
+Example: a selector-only check (e.g. "must call transfer") will pass even if a relayer changes:
+
+- recipient: Bob -> Eve
+- amount: 100 -> 1000
+
+The selector still matches, so the transaction executes with tampered parameters.
+
+execution-bound-intent prevents this by enforcing exact calldata equality:
+
+    transfer(0xBob, 100e6)   -> pass
+    transfer(0xEve, 100e6)   -> revert
+    transfer(0xBob, 1000e6)  -> revert
+
+See: test/RelayerMutationDemo.t.sol
+
 ## What this is
 
 Most delegation and permission systems ask: is this action allowed?
