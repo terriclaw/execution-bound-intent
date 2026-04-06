@@ -48,7 +48,7 @@ export function buildIntent(params: RunParams): ExecutionIntent {
 }
 
 export function buildMutatedIntent(params: RunParams): { calldata: `0x${string}`; dataHash: `0x${string}` } {
-  const mutatedRecipient = '0x000000000000000000000000000000000000eEeE' as `0x${string}`
+  const mutatedRecipient = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' as `0x${string}`
   const mutatedAmount = params.amount * 10n
   const calldata = encodeTransfer(mutatedRecipient, mutatedAmount)
   const dataHash = keccak256(calldata)
