@@ -110,6 +110,7 @@ Invariant enforced:
     AND target          == intent.target
     AND value           == intent.value
     AND _delegator      == intent.account
+    AND (intent.deadline == 0 OR block.timestamp <= intent.deadline)
 
 The nonce MUST be checked as unused before signature verification and consumed only after successful verification.
 
