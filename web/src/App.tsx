@@ -6,10 +6,10 @@ import {
 } from './lib/intent.js'
 
 const DEFAULT_PARAMS: RunParams = {
-  account:   '0xA1ceA1ceA1ceA1ceA1ceA1ceA1ceA1ceA1ceA1ce',
+  account:   '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
   target:    '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
   value:     0n,
-  recipient: '0xB0bB0bB0bB0bB0bB0bB0bB0bB0bB0bB0bB0bB0b',
+  recipient: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
   amount:    100_000_000n,
   nonce:     1n,
   deadline:  0n,
