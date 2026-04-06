@@ -9,7 +9,7 @@ The signer may differ from the delegator. The signature authorizes the execution
 
 ## How it fits
 
-v1 supports only single-call execution encoding. Batching and multicall are not supported.
+v1 supports only single-call execution encoding (CALLTYPE_SINGLE = 0x00). Delegatecall, batch, static, and unknown call types are rejected with UnsupportedCallType. This is enforced in the beforeHook via the ModeCode first byte.
 
 In the MM delegation framework, a Delegation carries a list of Caveats.
 Each Caveat has an enforcer address, terms (static config), and args (per-redemption payload).

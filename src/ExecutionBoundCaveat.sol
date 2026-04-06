@@ -29,6 +29,7 @@ contract ExecutionBoundCaveat {
     error IntentExpired(uint256 deadline, uint256 blockTimestamp);
     error NonceAlreadyUsed(address account, address signer, uint256 nonce);
     error InvalidSignature();
+    error UnsupportedCallType();
 
     constructor() {
         DOMAIN_SEPARATOR = keccak256(
@@ -50,13 +51,20 @@ contract ExecutionBoundCaveat {
     function beforeHook(
         bytes calldata _terms,
         bytes calldata _args,
-        bytes32,
+        bytes32 _mode,
         bytes calldata _executionCalldata,
         bytes32,
         address _delegator,
         address
     ) external {
         (_terms);
+
+        // Only single-call execution is supported in v1
+        // CALLTYPE_SINGLE = 0x00 (first byte of ModeCode)
+        // CALLTYPE_SINGLE = 0x00 (first byte of ModeCode); reject all other call types
+        if (bytes1(uint8(uint256(_mode) >> 248)) != 0x00) {
+            revert UnsupportedCallType();
+        }
 
         (ExecutionIntent memory intent, address signer, bytes memory signature) =
             abi.decode(_args, (ExecutionIntent, address, bytes));

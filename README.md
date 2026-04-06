@@ -45,7 +45,7 @@ Not a policy engine. A byte-level commitment check that verifies execution exact
 
 delegator = the smart account executing via DelegationManager (passed as _delegator in the caveat hook)
 
-execution.callData includes the full function selector and arguments, but excludes target and value (each checked separately). Extracted via ERC-7579 ExecutionLib.decodeSingle(). Assumes single-call execution encoding — multicall not supported in v1.
+execution.callData includes the full function selector and arguments, but excludes target and value (each checked separately). Extracted via ERC-7579 ExecutionLib.decodeSingle(). Assumes single-call execution encoding — multicall not supported in v1. Delegatecall, batch, static, and unknown call types are rejected at the enforcement boundary.
 
 ## Example
 

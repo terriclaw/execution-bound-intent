@@ -122,7 +122,7 @@ Implementations MUST support EOA signatures via ecrecover and ERC-1271 smart con
 
 ### Calldata Encoding
 
-This standard assumes a single-call execution model. Batching and multicall are out of scope for v1.
+This standard assumes a single-call execution model (CALLTYPE_SINGLE). Implementations MUST reject delegatecall, batch, static, and unknown call types. This enforcement closes the execution context ambiguity: under delegatecall, target semantics change in ways incompatible with the signed commitment model.
 
 execution.callData MUST refer strictly to the calldata of the call being executed, excluding any wrapper or envelope encoding used by the execution framework.
 
