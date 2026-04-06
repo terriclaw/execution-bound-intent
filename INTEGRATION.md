@@ -3,7 +3,13 @@
 This document shows how to wire ExecutionBoundCaveat into a MetaMask
 delegation-framework redemption as a caveat.
 
+## Signer vs delegator
+
+The signer may differ from the delegator. The signature authorizes the execution; the delegator account executes it. A session key, agent, or co-signer may sign on behalf of the delegating smart account.
+
 ## How it fits
+
+v1 supports only single-call execution encoding. Batching and multicall are not supported.
 
 In the MM delegation framework, a Delegation carries a list of Caveats.
 Each Caveat has an enforcer address, terms (static config), and args (per-redemption payload).
@@ -36,7 +42,7 @@ exactly matches a signed ExecutionIntent passed in args.
         name: "ExecutionBoundIntent",
         version: "1",
         chainId,
-        verifyingContract: CAVEAT_ENFORCER_ADDRESS,
+        verifyingContract: CAVEAT_ENFORCER_ADDRESS, // scopes signatures to this primitive specifically
       },
       types: {
         ExecutionIntent: [
@@ -90,12 +96,13 @@ When the redeemer calls DelegationManager.redeemDelegation():
     1. DelegationManager calls ExecutionBoundCaveat.beforeHook(terms, args, mode, executionCalldata, ...)
     2. Caveat decodes intent + signer + signature from args
     3. Caveat decodes target + value + callData from executionCalldata via ExecutionLib.decodeSingle()
-    4. Caveat checks all equality conditions
-    5. Caveat verifies EIP-712 signature
-    6. Caveat consumes nonce
-    7. DelegationManager proceeds with execution
+    4. Caveat checks nonce unused
+    5. Caveat checks equality conditions (account, target, value, dataHash, deadline)
+    6. Caveat verifies EIP-712 signature
+    7. Caveat consumes nonce
+    8. DelegationManager proceeds with execution
 
-If any check fails, the entire redemption reverts.
+If any check fails, the entire redemption reverts. No partial execution is possible.
 
 Invariant enforced:
 
@@ -108,7 +115,7 @@ The nonce MUST be checked as unused before signature verification and consumed o
 
 ## Encoding note
 
-In ERC-7579-compatible implementations, executionCalldata is commonly packed as:
+In ERC-7579-compatible implementations, executionCalldata is commonly packed as (assumes fixed-width: target 20 bytes, value 32 bytes):
 
     abi.encodePacked(target, value, calldata)
 
