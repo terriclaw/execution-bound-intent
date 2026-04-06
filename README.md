@@ -15,40 +15,19 @@ A canonical equality-based caveat for execution commitment.
 
 ## Why this matters
 
-Policy-based caveats allow silent parameter mutation.
+Policy-based caveats can allow silent parameter mutation.
 
-Example: a selector-only check (AllowedMethods) allows a relayer to change the recipient or amount while still passing validation. The selector matches — the parameters are never checked.
+A selector-only check (e.g. AllowedMethods) verifies the function, but not the parameters. A relayer can change the recipient or amount while still passing validation.
 
-execution-bound-intent prevents this by enforcing exact calldata equality at runtime.
+execution-bound-intent prevents this by enforcing exact calldata equality at runtime — any deviation reverts.
 
     Policy checks:     "is this allowed?"
     Execution-bound:   "is this exactly what was signed?"
 
 See: test/RelayerMutationDemo.t.sol
 
-    test_policyEnforcer_allowsRelayerMutation  -> mutation passes silently
-    test_executionBoundCaveat_blocksRelayerMutation -> DataHashMismatch revert
-
-
-
-## Why this matters
-
-Policy-based caveats can allow silent parameter mutation.
-
-Example: a selector-only check (e.g. "must call transfer") will pass even if a relayer changes:
-
-- recipient: Bob -> Eve
-- amount: 100 -> 1000
-
-The selector still matches, so the transaction executes with tampered parameters.
-
-execution-bound-intent prevents this by enforcing exact calldata equality:
-
-    transfer(0xBob, 100e6)   -> pass
-    transfer(0xEve, 100e6)   -> revert
-    transfer(0xBob, 1000e6)  -> revert
-
-See: test/RelayerMutationDemo.t.sol
+- test_policyEnforcer_allowsRelayerMutation -> mutation passes silently
+- test_executionBoundCaveat_blocksRelayerMutation -> revert
 
 ## What this is
 
