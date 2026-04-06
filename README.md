@@ -143,6 +143,21 @@ mode: accepted but not inspected — v1 assumes single call type.
 
 Scoped by (account, signer). Unordered — any value valid once.
 
+
+## Gas
+
+Benchmarked against a selector-only baseline enforcer.
+
+| Calldata size | ExecutionBoundCaveat | Selector-only | Overhead |
+|---|---|---|---|
+| Small (68 bytes)  | 60,793 gas | 15,900 gas | +44,893 (~3.8x) |
+| Medium (324 bytes) | 62,031 gas | 17,060 gas | +44,971 (~3.6x) |
+| Large (256 bytes) | 61,798 gas | 16,875 gas | +44,923 (~3.7x) |
+
+Overhead is flat across calldata sizes. Cost is dominated by EIP-712 digest construction and ecrecover (~45k gas), not calldata hashing. keccak256 of calldata is cheap.
+
+See: [`test/GasBenchmarks.t.sol`](./test/GasBenchmarks.t.sol)
+
 ## Setup
 
     forge install foundry-rs/forge-std
