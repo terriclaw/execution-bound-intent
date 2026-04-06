@@ -1,6 +1,8 @@
 # execution-bound-intent
 
-> **delegation without interpretation**
+> **exact execution or revert**
+
+A terminal enforcement primitive for delegated execution.
 
 **Invariant:**
 
@@ -24,6 +26,8 @@ execution-bound-intent prevents this by enforcing exact calldata equality at run
     Policy checks:     "is this allowed?"
     Execution-bound:   "is this exactly what was signed?"
 
+This gap appears whenever execution is delegated and calldata is constructed off-chain.
+
 See: [`test/RelayerMutationDemo.t.sol`](./test/RelayerMutationDemo.t.sol)
 
 - `test_policyEnforcer_allowsRelayerMutation` -> mutation passes silently
@@ -31,11 +35,7 @@ See: [`test/RelayerMutationDemo.t.sol`](./test/RelayerMutationDemo.t.sol)
 
 ## What this is
 
-Most delegation and permission systems ask: is this action allowed?
-
-execution-bound-intent asks: does the actual execution exactly match what was committed?
-
-This is not a policy engine. It is a commitment verification system.
+Not a policy engine. A byte-level commitment check.
 
 delegator = the smart account executing via DelegationManager (passed as _delegator in the caveat hook)
 
@@ -64,7 +64,7 @@ The commitment is to exact bytes, not to intent or meaning.
 ## Flow
 
     1. signer builds ExecutionIntent
-    2. signer signs EIP-712 digest
+    2. authorized signer signs EIP-712 digest bound to (account, target, value, calldata)
     3. intent + sig passed as caveat args at redemption
     4. execution submitted via DelegationManager
     5. caveat decodes real calldata via ExecutionLib.decodeSingle()
@@ -101,6 +101,7 @@ Any mismatch reverts. No interpretation. No flexibility.
 
 Prevented:
 
+- relayer-controlled calldata mutation -> exact equality enforcement at redemption
 - replay attack          -> nonce scoped by [account][signer][nonce]
 - cross-account reuse    -> account binding in struct
 - calldata mutation      -> keccak256(execution.callData) == intent.dataHash
@@ -156,7 +157,7 @@ Benchmarked against a selector-only baseline enforcer.
 
 Overhead is flat across calldata sizes. Cost is dominated by EIP-712 digest construction and ecrecover (~45k gas), not calldata hashing. keccak256 of calldata is cheap.
 
-See: [`[`test/GasBenchmarks.t.sol`](./test/GasBenchmarks.t.sol)`](./[`test/GasBenchmarks.t.sol`](./test/GasBenchmarks.t.sol))
+See: [`test/GasBenchmarks.t.sol`](./test/GasBenchmarks.t.sol)
 
 ## Setup
 
@@ -185,3 +186,4 @@ Designed for payment and execution paths where exactness is required. Not intend
 
 execution-bound-intent generalizes beyond AI and beyond one provider.
 The primitive is execution equality, not reasoning correctness.
+It does not decide what should happen — only that what happens is exactly what was signed.
