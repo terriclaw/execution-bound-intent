@@ -24,7 +24,7 @@ execution-bound-intent prevents this by enforcing exact calldata equality at run
     Policy checks:     "is this allowed?"
     Execution-bound:   "is this exactly what was signed?"
 
-See: test/RelayerMutationDemo.t.sol
+See: [`test/RelayerMutationDemo.t.sol`](./test/RelayerMutationDemo.t.sol)
 
 - `test_policyEnforcer_allowsRelayerMutation` -> mutation passes silently
 - `test_executionBoundCaveat_blocksRelayerMutation` -> revert
@@ -120,7 +120,7 @@ Multiple caveats can be stacked; all must pass. This enables strict conjunction:
 
 ## ERC-7710 / DelegationManager integration
 
-See INTEGRATION.md for a full reference integration.
+See [`INTEGRATION.md`](./INTEGRATION.md) for a full reference integration.
 
 beforeHook args (per-redemption):
 
