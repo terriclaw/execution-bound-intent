@@ -4,6 +4,8 @@
 
 A terminal enforcement primitive for delegated execution.
 
+**Live explainer:** https://terriclaw.github.io/execution-bound-intent/
+
 **Invariant:**
 
     keccak256(execution.callData) == intent.dataHash

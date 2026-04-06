@@ -181,6 +181,8 @@ Implementations SHOULD communicate clearly to signers that the nonce is irrevoca
 
 Available at: github.com/terriclaw/execution-bound-intent
 
+Live explainer: https://terriclaw.github.io/execution-bound-intent/
+
 - ExecutionIntentLib.sol: canonical EIP-712 struct and digest construction
 - ExecutionBoundCaveat.sol: reference enforcer implementing the full invariant
 - ts/buildExecutionIntent.ts: offchain intent builder
