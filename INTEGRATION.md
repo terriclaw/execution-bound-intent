@@ -97,15 +97,25 @@ When the redeemer calls DelegationManager.redeemDelegation():
 
 If any check fails, the entire redemption reverts.
 
+Invariant enforced:
+
+    keccak256(callData) == intent.dataHash
+    AND target          == intent.target
+    AND value           == intent.value
+    AND _delegator      == intent.account
+
+The nonce MUST be checked as unused before signature verification and consumed only after successful verification.
+
 ## Encoding note
 
-executionCalldata is packed as:
+In ERC-7579-compatible implementations, executionCalldata is commonly packed as:
 
     abi.encodePacked(target, value, calldata)
 
-decodeSingle() extracts:
-- target:   bytes [0:20]
-- value:    bytes [20:52]
-- callData: bytes [52:]
+Where target is bytes [0:20], value is bytes [20:52], and callData is bytes [52:].
 
-dataHash must be keccak256(callData) — not keccak256(the full packed envelope).
+Implementations MUST extract callData (the function calldata) and compute:
+
+    dataHash = keccak256(callData)
+
+dataHash MUST NOT be keccak256(the full packed envelope).
