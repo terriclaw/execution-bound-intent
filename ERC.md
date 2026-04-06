@@ -21,6 +21,8 @@ This standard defines a canonical commitment scheme where the signed authorizati
 
 Policy systems validate intent classes; this standard validates exact execution instances.
 
+Any transformation between signing and execution invalidates the transaction.
+
 ## Specification
 
 The key words MUST, MUST NOT, REQUIRED, SHALL, SHALL NOT, SHOULD, SHOULD NOT, RECOMMENDED, MAY, and OPTIONAL in this document are to be interpreted as described in RFC 2119.
@@ -31,9 +33,9 @@ The key words MUST, MUST NOT, REQUIRED, SHALL, SHALL NOT, SHOULD, SHOULD NOT, RE
 
 **delegator**: The smart account on whose behalf execution is authorized. Passed as `_delegator` by the delegation framework at redemption time.
 
-**signer**: The address whose signature authorizes the intent. MAY be an EOA or ERC-1271 smart contract.
+**signer**: The address supplied alongside the signature in args, used for verification and nonce scoping. MAY be an EOA or ERC-1271 smart contract. MUST be supplied explicitly — it is not derived from the signature.
 
-**execution.callData**: The function calldata of the call to be executed. This refers strictly to the calldata bytes, not any packed execution envelope.
+**execution.callData**: The function calldata of the call to be executed, including the full function selector and arguments. Excludes target and value, which are checked separately.
 
 **dataHash**: keccak256(execution.callData). Binds the selector and all calldata parameters.
 
@@ -49,7 +51,9 @@ struct ExecutionIntent {
 }
 ```
 
-Implementations MUST NOT extend this struct with additional fields in v1.
+All fields of ExecutionIntent are included in the signed EIP-712 message and are binding.
+
+Implementations MUST NOT extend this struct for compatibility with this standard.
 
 ### EIP-712 Typehash
 ```solidity
@@ -100,10 +104,10 @@ At redemption, an enforcer MUST verify all of the following, in order:
 4. intent.dataHash == keccak256(execution.callData)
 5. intent.deadline == 0 OR block.timestamp <= intent.deadline
 6. usedNonces[intent.account][signer][intent.nonce] == false
-7. Signature is valid over the EIP-712 digest for signer (EOA or ERC-1271)
+7. Signature MUST recover to signer and be valid over the EIP-712 digest (EOA or ERC-1271)
 8. Mark usedNonces[intent.account][signer][intent.nonce] = true
 
-The enforcer MUST revert if any condition fails. The nonce MUST be checked as unused before signature verification AND marked used only after successful verification. Implementations MUST NOT consume the nonce on signature failure.
+The enforcer MUST revert if any condition fails. The nonce MUST be checked as unused before signature verification AND marked used only after successful verification. Implementations MUST NOT consume the nonce on signature failure. This ordering prevents griefing via invalid signatures consuming nonces.
 
 ### Nonce Model
 ```solidity
@@ -117,6 +121,8 @@ Nonces MUST be scoped by (account, signer). A signer's nonce space is independen
 Implementations MUST support EOA signatures via ecrecover and ERC-1271 smart contract signatures via isValidSignature. Support for ERC-7913 address-less verifiers is OPTIONAL and out of scope for v1.
 
 ### Calldata Encoding
+
+This standard assumes a single-call execution model. Batching and multicall are out of scope for v1.
 
 execution.callData MUST refer strictly to the calldata of the call being executed, excluding any wrapper or envelope encoding used by the execution framework.
 
@@ -157,8 +163,7 @@ Including chainId in both the domain and the struct is redundant given EIP-712 d
 - Relayer calldata substitution
 - Target substitution
 - Value mutation
-- Cross-chain replay (EIP-712 domain binds chainId)
-- Cross-contract replay (EIP-712 domain binds verifyingContract)
+- Replay across domains (chainId + verifyingContract) via EIP-712 domain separation
 - Intent replay (nonce consumption)
 - Stale authorization reuse (deadline)
 
