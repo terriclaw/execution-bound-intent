@@ -1,2 +1,3 @@
 @openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/
+@erc7579/=lib/erc7579-implementation/src/
 forge-std/=lib/forge-std/src/

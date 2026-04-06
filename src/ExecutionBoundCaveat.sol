@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
+import { ExecutionLib } from "@erc7579/lib/ExecutionLib.sol";
 import { SignatureChecker } from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import { ExecutionIntent, ExecutionIntentLib } from "./libs/ExecutionIntentLib.sol";
 
-struct Execution {
-    address target;
-    uint256 value;
-    bytes callData;
-}
-
+/// @title ExecutionBoundCaveat
+/// @notice Equality-based caveat enforcer compatible with ERC-7710 / MetaMask delegation framework.
+/// @dev beforeHook signature matches ICaveatEnforcer from the MM delegation framework.
+///      ModeCode is accepted but not inspected — this enforcer only supports single call type.
 contract ExecutionBoundCaveat {
     using ExecutionIntentLib for ExecutionIntent;
 
@@ -43,29 +42,38 @@ contract ExecutionBoundCaveat {
         );
     }
 
+    /// @notice Called by DelegationManager before execution.
+    /// @param _terms    Unused in v1. Pass empty bytes.
+    /// @param _args     abi.encode(ExecutionIntent intent, address signer, bytes signature)
+    /// @param _executionCalldata  Packed execution: abi.encodePacked(target, value, calldata)
+    /// @param _delegator   The delegating smart account. Must match intent.account.
     function beforeHook(
         bytes calldata _terms,
         bytes calldata _args,
-        Execution calldata _execution,
+        bytes32,
+        bytes calldata _executionCalldata,
+        bytes32,
         address _delegator,
-        address _redeemer,
-        bytes32 _delegationHash
+        address
     ) external {
-        (_terms, _redeemer, _delegationHash);
+        (_terms);
 
         (ExecutionIntent memory intent, address signer, bytes memory signature) =
             abi.decode(_args, (ExecutionIntent, address, bytes));
 
+        (address target, uint256 value, bytes calldata callData) =
+            ExecutionLib.decodeSingle(_executionCalldata);
+
         if (intent.account != _delegator)
             revert AccountMismatch(intent.account, _delegator);
 
-        if (intent.target != _execution.target)
-            revert TargetMismatch(intent.target, _execution.target);
+        if (intent.target != target)
+            revert TargetMismatch(intent.target, target);
 
-        if (intent.value != _execution.value)
-            revert ValueMismatch(intent.value, _execution.value);
+        if (intent.value != value)
+            revert ValueMismatch(intent.value, value);
 
-        bytes32 executionDataHash = keccak256(_execution.callData);
+        bytes32 executionDataHash = keccak256(callData);
         if (intent.dataHash != executionDataHash)
             revert DataHashMismatch(intent.dataHash, executionDataHash);
 
