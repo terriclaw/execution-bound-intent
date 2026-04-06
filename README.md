@@ -17,9 +17,9 @@ Enforced at redemption time inside the DelegationManager caveat hook.
 
 No partial matches. No parameter tolerance. Equality is strict.
 
-Any transformation between signing and execution invalidates the transaction.
+Any transformation to the committed execution invalidates the transaction.
 
-target, value, and calldata are all part of the signed commitment.
+account, target, value, calldata, nonce, and deadline are all part of the signed commitment.
 
 ## Why this matters
 
@@ -41,8 +41,7 @@ See: [`test/RelayerMutationDemo.t.sol`](./test/RelayerMutationDemo.t.sol)
 
 ## What this is
 
-Not a policy engine. A byte-level commitment check.
-It verifies that execution exactly matches what was signed.
+Not a policy engine. A byte-level commitment check that verifies execution exactly matches what was signed.
 
 delegator = the smart account executing via DelegationManager (passed as _delegator in the caveat hook)
 
@@ -78,7 +77,7 @@ Signature domain includes chainId and verifying contract address, preventing cro
 
 ## Flow
 
-    1. signer builds ExecutionIntent
+    1. ExecutionIntent is constructed (by app, agent, or wallet)
     2. authorized signer signs EIP-712 digest bound to (account, target, value, calldata, nonce, deadline)
     3. intent + sig passed as caveat args at redemption
     4. execution submitted via DelegationManager
@@ -117,11 +116,10 @@ Any mismatch reverts. No interpretation. No flexibility.
 Prevented:
 
 - relayer-controlled calldata mutation -> exact equality enforcement at redemption
-- cross-chain replay -> prevented via EIP-712 domain separation (chainId + verifyingContract)
-- replay attack          -> nonce scoped by [account][signer][nonce]
-- cross-account reuse    -> account binding in struct
-- cross-contract replay  -> EIP-712 domain (verifyingContract)
-- signature spoofing     -> EOA / ERC-1271 via OZ SignatureChecker
+- replay across domains -> prevented by EIP-712 domain separation (chainId + verifyingContract)
+- replay within the same domain -> prevented by nonce scoping to (account, signer, nonce)
+- cross-account reuse -> prevented by account binding in the signed intent
+- signature spoofing -> prevented by EOA / ERC-1271 signature verification
 
 Not prevented:
 
@@ -187,6 +185,8 @@ See: [`test/GasBenchmarks.t.sol`](./test/GasBenchmarks.t.sol)
 ## Scope
 
 Designed for payment and execution paths where exactness is required. Not intended for flexible agent decision layers or policy-based authorization.
+
+This primitive optimizes for correctness, not flexibility or low-cost repeated execution.
 
 ## Deferred (not v1)
 
