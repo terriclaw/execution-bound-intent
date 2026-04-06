@@ -176,6 +176,25 @@ This cost profile favors high-value, low-frequency execution paths.
 
 See: [`test/GasBenchmarks.t.sol`](./test/GasBenchmarks.t.sol)
 
+## Flowwire — full ERC-7710 redemption path
+
+[`test/Flowwire7710.t.sol`](./test/Flowwire7710.t.sol) proves the primitive inside the real MetaMask delegation framework stack — not just at the `beforeHook` boundary.
+
+**Two signatures, kept separate:**
+
+    [Sig 1] Delegator signs delegation via DelegationManager EIP-712 domain
+            → says who may redeem
+    [Sig 2] Signer signs ExecutionIntent via ExecutionBoundCaveat EIP-712 domain
+            → says what exact execution is allowed
+
+**Key finding:** `args` is excluded from the delegation hash by design. The redeemer injects the signed ExecutionIntent at redemption time — but the caveat binds it back to `_delegator`, `target`, `value`, `calldata`, `nonce`, and signature validity. The redeemer cannot substitute a different intent.
+
+**Four cases proven through real DelegationManager:**
+- exact execution → `demoTarget.value() == 42`
+- mutated calldata → `DataHashMismatch` revert
+- replay → `NonceAlreadyUsed` revert
+- non-single call type → `UnsupportedCallType` revert
+
 ## Integration flow
 
 [`test/IntegrationFlow.t.sol`](./test/IntegrationFlow.t.sol) exercises the same `beforeHook` path that `DelegationManager` calls at redemption time — same args encoding, same `ExecutionLib.encodeSingle` executionCalldata, same mode byte.

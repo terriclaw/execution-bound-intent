@@ -3,6 +3,18 @@
 This document shows how to wire ExecutionBoundCaveat into a MetaMask
 delegation-framework redemption as a caveat.
 
+## Flowwire — full redemption path
+
+[`test/Flowwire7710.t.sol`](./test/Flowwire7710.t.sol) runs the full `DelegationManager.redeemDelegations` path with a real `HybridDeleGator` smart account.
+
+Key architectural detail: `args` is excluded from the delegation hash (`CAVEAT_TYPEHASH` only includes `enforcer` and `terms`). The redeemer populates `delegation.caveats[0].args` with `abi.encode(intent, signer, signature)` at redemption time. The caveat then binds this back to `_delegator` and exact execution — the redeemer cannot substitute a different intent.
+
+Mental model:
+- delegation signature → who may redeem
+- intent signature → what exact execution is allowed
+- caveat → enforces the join between them
+- manager → orchestrates the path
+
 ## Reference integration test
 
 [`test/IntegrationFlow.t.sol`](./test/IntegrationFlow.t.sol) calls `beforeHook` exactly as `DelegationManager` would — same args encoding, same executionCalldata, same mode byte. It proves exact execution passes and mutated execution reverts at the caveat boundary.
