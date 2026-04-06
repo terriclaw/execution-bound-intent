@@ -23,7 +23,7 @@ This is not a policy engine. It is a commitment verification system.
 
 delegator = the smart account executing via DelegationManager (passed as _delegator in the caveat hook)
 
-execution.callData refers only to the function calldata, not the full packed execution envelope.
+execution.callData is extracted from the packed execution via ERC-7579 ExecutionLib.decodeSingle() and refers only to the function calldata (not the packed envelope).
 
 ## Example
 
@@ -37,10 +37,10 @@ execution.callData refers only to the function calldata, not the full packed exe
 
     Result:
       transfer(0xBob, 100e6)  -> pass
-      transfer(0xBob, 101e6)  -> revert (dataHash mismatch)
-      transfer(0xEve, 100e6)  -> revert (dataHash mismatch)
-      approve(0xEve, 100e6)   -> revert (dataHash mismatch)
-      same intent submitted twice -> revert (nonce already used)
+      transfer(0xBob, 101e6)  -> revert (DataHashMismatch)
+      transfer(0xEve, 100e6)  -> revert (DataHashMismatch)
+      approve(0xEve, 100e6)   -> revert (DataHashMismatch)
+      same intent submitted twice -> revert (NonceAlreadyUsed)
 
 Modifying a single byte of calldata causes a DataHashMismatch revert.
 The commitment is to exact bytes, not to intent or meaning.
@@ -51,8 +51,9 @@ The commitment is to exact bytes, not to intent or meaning.
     2. signer signs EIP-712 digest
     3. intent + sig passed as caveat args at redemption
     4. execution submitted via DelegationManager
-    5. caveat recomputes hash + verifies signature
-    6. equality holds -> execute; else revert
+    5. caveat decodes real calldata via ExecutionLib.decodeSingle()
+    6. caveat recomputes hash + verifies signature
+    7. equality holds -> execute; else revert
 
 ## The struct
 
@@ -69,7 +70,7 @@ The commitment is to exact bytes, not to intent or meaning.
 
 At redemption, ExecutionBoundCaveat checks in order:
 
-- intent.account == _delegator         (binds authorization to a specific smart account context, preventing cross-account replay)
+- intent.account == _delegator         (binds to specific smart account, prevents cross-account replay)
 - intent.target == execution.target
 - intent.value == execution.value
 - intent.dataHash == keccak256(execution.callData)
@@ -94,13 +95,15 @@ Not prevented:
 
 - signer key compromise
 - user signing a malicious intent
-- front-running an identical execution (by design: the commitment is to the call, not the caller)
+- front-running an identical execution (by design: commitment is to the call, not the caller)
 
 ## Composability
 
 Multiple caveats can be stacked; all must pass, enabling strict conjunction: all commitments must independently hold.
 
-## ERC-7710 integration
+## ERC-7710 / DelegationManager integration
+
+See INTEGRATION.md for a full reference integration.
 
 beforeHook args (per-redemption):
 
@@ -108,17 +111,14 @@ beforeHook args (per-redemption):
 
 signer is the address expected to have produced the signature (distinct from _redeemer).
 terms: unused in v1, pass empty bytes.
+mode: accepted but not inspected — v1 assumes single call type.
 
 ## Standardization surface
-
-The standardizable pieces are narrow and intentional:
 
 - ExecutionIntent struct
 - EIP-712 typehash and domain model
 - equality invariant
 - nonce scoping by (account, signer)
-
-That is sufficient to describe in one paragraph and small enough for others to adopt.
 
 ## Nonce model
 
@@ -130,6 +130,7 @@ Scoped by (account, signer). Unordered — any value valid once.
 
     forge install foundry-rs/forge-std
     forge install OpenZeppelin/openzeppelin-contracts
+    forge install erc7579/erc7579-implementation
     forge build
     forge test
 
