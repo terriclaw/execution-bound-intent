@@ -11,13 +11,13 @@ A terminal enforcement primitive for delegated execution.
     AND execution.value           == intent.value
     AND intent.account            == _delegator
 
-Authorization is reduced to byte-level equality, eliminating policy interpretation.
+Authorization is enforced via byte-level equality of the committed execution.
 
 Enforced at redemption time inside the DelegationManager caveat hook.
 
 No partial matches. No parameter tolerance. Equality is strict.
 
-A canonical equality-based caveat for execution commitment.
+target, value, and calldata are all part of the signed commitment.
 
 ## Why this matters
 
@@ -44,7 +44,7 @@ It verifies that execution exactly matches what was signed.
 
 delegator = the smart account executing via DelegationManager (passed as _delegator in the caveat hook)
 
-execution.callData is extracted from the packed execution via ERC-7579 ExecutionLib.decodeSingle() and refers only to the function calldata (not the packed envelope).
+execution.callData is extracted from the packed execution via ERC-7579 ExecutionLib.decodeSingle() and refers only to the function calldata (not the packed envelope). Assumes single-call execution encoding — multicall not supported in v1.
 
 ## Example
 
@@ -65,6 +65,10 @@ execution.callData is extracted from the packed execution via ERC-7579 Execution
 
 Modifying a single byte of calldata causes a DataHashMismatch revert.
 The commitment is to exact bytes, not to intent or meaning.
+
+## Signer vs delegator
+
+The signer may be distinct from the delegating account (`_delegator`). Authorization is via signature; execution is via account. A session key, agent, or co-signer may sign on behalf of the delegating smart account.
 
 ## Flow
 
@@ -98,7 +102,7 @@ At redemption, ExecutionBoundCaveat checks in order:
 - intent.deadline == 0 OR block.timestamp <= intent.deadline
 - usedNonces[account][signer][nonce] == false
 - valid EOA or ERC-1271 signature over the EIP-712 digest of ExecutionIntent
-- nonce is consumed only after successful signature verification
+- nonce is consumed only after successful signature verification (prevents griefing via invalid signature nonce consumption)
 
 Any mismatch reverts. No interpretation. No flexibility.
 
@@ -107,6 +111,7 @@ Any mismatch reverts. No interpretation. No flexibility.
 Prevented:
 
 - relayer-controlled calldata mutation -> exact equality enforcement at redemption
+- cross-chain replay -> prevented via EIP-712 domain separation (chainId + verifyingContract)
 - replay attack          -> nonce scoped by [account][signer][nonce]
 - cross-account reuse    -> account binding in struct
 - cross-contract replay  -> EIP-712 domain (verifyingContract)
@@ -160,6 +165,8 @@ Benchmarked against a selector-only baseline enforcer.
 | Large (256 bytes) | 61,798 gas | 16,875 gas | +44,923 (~3.7x) |
 
 Overhead is flat across calldata sizes. Cost is dominated by EIP-712 digest construction and ecrecover (~45k gas), not calldata hashing. keccak256 of calldata is cheap.
+
+This cost profile favors high-value, low-frequency execution paths.
 
 See: [`test/GasBenchmarks.t.sol`](./test/GasBenchmarks.t.sol)
 
