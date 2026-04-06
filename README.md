@@ -26,8 +26,8 @@ execution-bound-intent prevents this by enforcing exact calldata equality at run
 
 See: test/RelayerMutationDemo.t.sol
 
-- test_policyEnforcer_allowsRelayerMutation -> mutation passes silently
-- test_executionBoundCaveat_blocksRelayerMutation -> revert
+- `test_policyEnforcer_allowsRelayerMutation` -> mutation passes silently
+- `test_executionBoundCaveat_blocksRelayerMutation` -> revert
 
 ## What this is
 
@@ -112,10 +112,11 @@ Not prevented:
 - signer key compromise
 - user signing a malicious intent
 - front-running an identical execution (by design: commitment is to the call, not the caller)
+- downstream contract behavior depending on mutable external state
 
 ## Composability
 
-Multiple caveats can be stacked; all must pass, enabling strict conjunction: all commitments must independently hold.
+Multiple caveats can be stacked; all must pass. This enables strict conjunction: each commitment must independently hold.
 
 ## ERC-7710 / DelegationManager integration
 
