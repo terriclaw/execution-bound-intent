@@ -9,11 +9,13 @@ A terminal enforcement primitive for delegated execution.
     keccak256(execution.callData) == intent.dataHash
     AND execution.target          == intent.target
     AND execution.value           == intent.value
-    AND intent.account            == delegator
+    AND intent.account            == _delegator
 
 Authorization is reduced to byte-level equality, eliminating policy interpretation.
 
 Enforced at redemption time inside the DelegationManager caveat hook.
+
+No partial matches. No parameter tolerance. Equality is strict.
 
 A canonical equality-based caveat for execution commitment.
 
@@ -107,7 +109,6 @@ Prevented:
 - relayer-controlled calldata mutation -> exact equality enforcement at redemption
 - replay attack          -> nonce scoped by [account][signer][nonce]
 - cross-account reuse    -> account binding in struct
-- calldata mutation      -> keccak256(execution.callData) == intent.dataHash
 - cross-contract replay  -> EIP-712 domain (verifyingContract)
 - signature spoofing     -> EOA / ERC-1271 via OZ SignatureChecker
 
