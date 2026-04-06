@@ -2,7 +2,10 @@
 
 > **delegation without interpretation**
 
-A primitive where a signed authorization is only valid if the actual onchain execution exactly matches the committed execution.
+**Invariant:** the executed call must exactly match the signed ExecutionIntent —
+keccak256(actual calldata) == intent.dataHash AND all envelope fields equal.
+
+A canonical equality-based caveat for execution commitment.
 
 ## What this is
 
@@ -12,34 +15,84 @@ execution-bound-intent asks: does the actual execution exactly match what was co
 
 This is not a policy engine. It is a commitment verification system.
 
-## The invariant
+## Flow
 
-At redemption, ExecutionBoundCaveat enforces:
+    1. signer builds ExecutionIntent
+    2. signer signs EIP-712 digest
+    3. intent + sig passed as caveat args at redemption
+    4. execution submitted via DelegationManager
+    5. caveat recomputes hash + verifies signature
+    6. equality holds → execute; else revert
 
-- intent.account == _delegator
+## The struct
+
+    struct ExecutionIntent {
+        address account;   // the delegating smart account
+        address target;
+        uint256 value;
+        bytes32 dataHash;  // keccak256(calldata)
+        uint256 nonce;
+        uint256 deadline;  // 0 = no expiry
+    }
+
+## Enforcement
+
+At redemption, ExecutionBoundCaveat checks:
+
+- intent.account == _delegator         (binds authorization to a specific smart account context, preventing cross-account replay)
 - intent.target == execution.target
 - intent.value == execution.value
 - intent.dataHash == keccak256(execution.callData)
-- block.timestamp <= intent.deadline (if set)
+- block.timestamp <= intent.deadline   (if set)
 - usedNonces[account][signer][nonce] == false
 - valid EOA or ERC-1271 signature over EIP-712 digest
 
 Any mismatch reverts. No interpretation. No flexibility.
 
-## What it guarantees
+## Threat model
 
-- No parameter tampering by relayers
-- No target substitution
-- No calldata drift
-- No chain replay (EIP-712 domain binds chain + contract)
-- No intent replay (nonce consumed on first use)
+Prevented:
 
-## What it does not guarantee
+- replay attack → nonce scoped by [account][signer][nonce]
+- cross-account reuse → account binding in struct
+- calldata mutation → dataHash equality check
+- cross-contract replay → EIP-712 domain (verifyingContract)
+- signature spoofing → EOA / ERC-1271 via OZ SignatureChecker
 
-- Correct reasoning behind the intent
-- Economic optimality of the committed call
-- Downstream contract behavior depending on external state
-- MEV resistance beyond execution integrity
+Not prevented:
+
+- signer key compromise
+- user signing a malicious intent
+- front-running an identical execution (by design: the commitment is to the call, not the caller)
+
+## Composability
+
+Multiple caveats can be stacked; all must pass, enabling composition of independent commitment checks.
+
+## ERC-7710 integration
+
+beforeHook args (per-redemption):
+
+    abi.encode(ExecutionIntent intent, address signer, bytes signature)
+
+terms: unused in v1, pass empty bytes.
+
+## Standardization surface
+
+The standardizable pieces are narrow and intentional:
+
+- ExecutionIntent struct
+- EIP-712 typehash and domain model
+- equality invariant
+- nonce scoping by (account, signer)
+
+That is sufficient to describe in one paragraph and small enough for others to adopt.
+
+## Nonce model
+
+    mapping(address account => mapping(address signer => mapping(uint256 nonce => bool))) usedNonces;
+
+Scoped by (account, signer). Unordered — any value valid once.
 
 ## Setup
 
@@ -47,17 +100,6 @@ Any mismatch reverts. No interpretation. No flexibility.
     forge install OpenZeppelin/openzeppelin-contracts
     forge build
     forge test
-
-## Nonce model
-
-Scoped by (account, signer, nonce). Unordered — any value valid once.
-
-## ERC-7710 integration
-
-beforeHook args (per-redemption):
-    abi.encode(ExecutionIntent intent, address signer, bytes signature)
-
-terms: unused in v1, pass empty bytes.
 
 ## Deferred (not v1)
 
@@ -73,3 +115,4 @@ terms: unused in v1, pass empty bytes.
 - OnlyAgentProofCaveat: commitment verification at delegation layer; direct precursor
 
 execution-bound-intent generalizes beyond AI and beyond one provider.
+The primitive is execution equality, not reasoning correctness.
