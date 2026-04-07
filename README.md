@@ -20,6 +20,7 @@ Enforced at redemption time inside the DelegationManager caveat hook.
 
 Delegation defines who may execute.
 execution-bound-intent defines what must be executed.
+Enforcement happens only at redemption.
 
 No partial matches. No parameter tolerance. Equality is strict.
 
