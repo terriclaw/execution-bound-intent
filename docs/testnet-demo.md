@@ -1,4 +1,5 @@
-execution-bound-intent enforces exact execution at redemption using a second EIP-712 signature, removing relayer discretion.
+## execution-bound-intent
+enforces exact execution at redemption using a second EIP-712 signature, removing relayer discretion.
 
 # Testnet Demo — Base Sepolia
 
@@ -15,7 +16,7 @@ Base Sepolia (chain ID 84532)
 | ExecutionBoundCaveat | [0xD4c2D166839a6cCDb9Bf0f3cD292686587Ae9Eb6](https://sepolia.basescan.org/address/0xD4c2D166839a6cCDb9Bf0f3cD292686587Ae9Eb6) |
 | DemoTarget | [0x6bAaC44B3Dc269012829e591d256Ea8d5D8F15Db](https://sepolia.basescan.org/address/0x6bAaC44B3Dc269012829e591d256Ea8d5D8F15Db) |
 | DelegatorAccount (HybridDeleGator proxy) | 0xA7858cbB8be2cD50cc9e04e62eCD58BF86381137 |
-| DelegationManager (MM v1.3.0) | 0xdb9B1e94B5b69Df7e401DDbedE43491141047dB3 |
+| DelegationManager (MM v1.3.0) | [0xdb9B1e94B5b69Df7e401DDbedE43491141047dB3](https://sepolia.basescan.org/address/0xdb9B1e94B5b69Df7e401DDbedE43491141047dB3) |
 
 ## Flow 1 — exact execution (onchain)
 
