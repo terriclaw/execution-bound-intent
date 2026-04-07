@@ -5,3 +5,4 @@ cache/
 web/node_modules/
 web/dist/
 ts/node_modules/
+.env
