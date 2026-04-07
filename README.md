@@ -3,6 +3,7 @@
 > **exact execution or revert**
 
 A terminal enforcement primitive for delegated execution.
+Binds execution to a signed intent at redemption.
 
 **Live explainer:** https://terriclaw.github.io/execution-bound-intent/
 
@@ -13,9 +14,12 @@ A terminal enforcement primitive for delegated execution.
     AND execution.value           == intent.value
     AND intent.account            == _delegator
 
-Execution is authorized only if signature validity and byte-level equality both hold.
+Execution succeeds only if signature validity and exact equality both hold.
 
 Enforced at redemption time inside the DelegationManager caveat hook.
+
+Delegation defines who may execute.
+execution-bound-intent defines what must be executed.
 
 No partial matches. No parameter tolerance. Equality is strict.
 
@@ -29,7 +33,7 @@ Policy-based caveats can allow silent parameter mutation.
 
 A selector-only check (e.g. AllowedMethods) verifies the function, but not the parameters. A relayer can change the recipient or amount while still passing validation.
 
-execution-bound-intent enforces exact calldata equality at runtime; any deviation reverts.
+execution-bound-intent enforces exact execution equality at redemption; any deviation reverts.
 
     Policy checks:     "is this allowed?"
     Execution-bound:   "is this exactly what was signed?"
@@ -43,7 +47,7 @@ See: [`test/RelayerMutationDemo.t.sol`](./test/RelayerMutationDemo.t.sol)
 
 ## What this is
 
-Not a policy engine. A byte-level commitment check that verifies execution exactly matches what was signed.
+Not a policy engine. A byte-level commitment check that verifies execution exactly matches what was signed, evaluated only at redemption.
 
 delegator = the smart account executing via DelegationManager (passed as _delegator in the caveat hook)
 
@@ -68,6 +72,7 @@ execution.callData includes the full function selector and arguments, but exclud
 
 Modifying a single byte of calldata causes a DataHashMismatch revert.
 The commitment is to exact bytes, not to intent or meaning.
+The commitment is to bytes, not semantics.
 
 ## Signer vs delegator
 
@@ -84,7 +89,7 @@ Signature domain includes chainId and verifying contract address, preventing cro
     3. intent + sig passed as caveat args at redemption
     4. execution submitted via DelegationManager
     5. caveat decodes real calldata via ExecutionLib.decodeSingle()
-    6. caveat checks nonce, recomputes hash, verifies signature
+    6. caveat recomputes hash, verifies signature, then consumes nonce
     7. equality holds -> execute; else revert
 
 ## The struct
@@ -132,7 +137,7 @@ Not prevented:
 
 ## Composability
 
-Multiple caveats can be stacked; all must pass. This enables strict conjunction: each commitment must independently hold.
+Multiple caveats can be stacked; all must pass. This enables strict conjunction: each commitment must independently hold. This enables commitment layering.
 
 ## ERC-7710 / DelegationManager integration
 
@@ -172,6 +177,7 @@ Benchmarked against a selector-only baseline enforcer.
 
 Overhead is flat across calldata sizes. Cost is dominated by EIP-712 digest construction and ecrecover (~45k gas), not calldata hashing. keccak256 of calldata is cheap.
 
+Cost is constant per execution, not proportional to calldata size.
 This cost profile favors high-value, low-frequency execution paths.
 
 See: [`test/GasBenchmarks.t.sol`](./test/GasBenchmarks.t.sol)
