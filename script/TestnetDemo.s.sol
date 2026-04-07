@@ -8,6 +8,7 @@ import { ERC1967Proxy } from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy
 import { ExecutionLib } from "@erc7579/lib/ExecutionLib.sol";
 import { ModeLib } from "@erc7579/lib/ModeLib.sol";
 import { Delegation, Caveat, ModeCode } from "@delegation-framework/utils/Types.sol";
+import { EncoderLib } from "@delegation-framework/libraries/EncoderLib.sol";
 import { ExecutionBoundCaveat } from "../src/ExecutionBoundCaveat.sol";
 import { ExecutionIntent, ExecutionIntentLib } from "../src/libs/ExecutionIntentLib.sol";
 import { DemoTarget } from "../src/DemoTarget.sol";
@@ -43,11 +44,6 @@ contract TestnetDemo is Script {
     address constant IMPL = 0x48dBe696A4D990079e039489bA2053B36E8FFEC4;
 
     // Delegation typehashes - inlined to avoid SCL transitive imports
-    bytes32 constant DELEGATION_TYPEHASH = keccak256(
-        "Delegation(address delegate,address delegator,bytes32 authority,Caveat[] caveats,uint256 salt)Caveat(address enforcer,bytes terms)"
-    );
-    bytes32 constant CAVEAT_TYPEHASH = keccak256("Caveat(address enforcer,bytes terms)");
-
     // State shared across helpers
     ExecutionBoundCaveat caveat;
     DemoTarget           target;
@@ -105,14 +101,13 @@ contract TestnetDemo is Script {
             salt:      0,
             signature: hex""
         });
-        // Sign delegation
-        bytes32[] memory ch = new bytes32[](1);
-        ch[0] = keccak256(abi.encode(CAVEAT_TYPEHASH, caveats[0].enforcer, keccak256(caveats[0].terms)));
-        bytes32 dHash = keccak256(abi.encode(
-            DELEGATION_TYPEHASH, d.delegate, d.delegator, d.authority,
-            keccak256(abi.encodePacked(ch)), d.salt
-        ));
-        bytes32 tHash = dHash.toTypedDataHash(IDelegationManager(DM).getDomainHash());
+        // Sign delegation using real EncoderLib
+        bytes32 dHash = EncoderLib._getDelegationHash(d);
+        console.log("delegationHash:");
+        console.logBytes32(dHash);
+        bytes32 tHash = MessageHashUtils.toTypedDataHash(IDelegationManager(DM).getDomainHash(), dHash);
+        console.log("typedDataHash:");
+        console.logBytes32(tHash);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(delegatorKey, tHash);
         d.signature = abi.encodePacked(r, s, v);
     }

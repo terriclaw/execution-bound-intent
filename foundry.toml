@@ -14,3 +14,12 @@ bracket_spacing = true
 [rpc_endpoints]
 mainnet = "${RPC_MAINNET}"
 base = "${RPC_BASE}"
+
+[profile.demo]
+src = "src"
+script = "script"
+out = "out"
+libs = ["lib"]
+optimizer = true
+optimizer_runs = 200
+via_ir = false
