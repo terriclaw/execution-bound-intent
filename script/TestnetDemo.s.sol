@@ -30,7 +30,7 @@ interface IDelegationManager {
 /// Run:
 ///   forge script script/TestnetDemo.s.sol --rpc-url $RPC_URL --broadcast -vvvv
 ///
-/// Sepolia v1.3.0:
+/// Base Sepolia v1.3.0 (chain ID 84532):
 ///   DelegationManager:   0xdb9B1e94B5b69Df7e401DDbedE43491141047dB3
 ///   HybridDeleGatorImpl: 0x48dBe696A4D990079e039489bA2053B36E8FFEC4
 
