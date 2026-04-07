@@ -136,7 +136,7 @@ Multiple caveats can be stacked; all must pass. This enables strict conjunction:
 
 ## ERC-7710 / DelegationManager integration
 
-See [`INTEGRATION.md`](./INTEGRATION.md) for a full reference integration.
+See [`INTEGRATION.md`](./docs/INTEGRATION.md) for a full reference integration.
 
 beforeHook args (per-redemption):
 
