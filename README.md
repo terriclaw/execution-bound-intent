@@ -180,7 +180,7 @@ See: [`test/GasBenchmarks.t.sol`](./test/GasBenchmarks.t.sol)
 
 [`docs/testnet-demo.md`](./docs/testnet-demo.md)
 
-Flow 1 (exact execution) is live onchain. Flows 2 (mutation) and 3 (replay) are proven in simulation.
+Flow 1 (exact execution) is live onchain. Flows 2 (mutation) and 3 (replay) revert as expected (proven in simulation).
 
 - Exact execution tx: `0x03197ac7f52ce016449270efc564b1d3ab547e70bdb0bdd4ff0007d136264801`
 - ExecutionBoundCaveat: `0xD4c2D166839a6cCDb9Bf0f3cD292686587Ae9Eb6`

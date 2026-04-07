@@ -1,3 +1,5 @@
+execution-bound-intent enforces exact execution at redemption using a second EIP-712 signature, removing relayer discretion.
+
 # Testnet Demo — Base Sepolia
 
 Public onchain proof of execution-bound-intent running through the real MetaMask DelegationManager.
@@ -10,14 +12,14 @@ Base Sepolia (chain ID 84532)
 
 | Contract | Address |
 |---|---|
-| ExecutionBoundCaveat | 0xD4c2D166839a6cCDb9Bf0f3cD292686587Ae9Eb6 |
-| DemoTarget | 0x6bAaC44B3Dc269012829e591d256Ea8d5D8F15Db |
+| ExecutionBoundCaveat | [0xD4c2D166839a6cCDb9Bf0f3cD292686587Ae9Eb6](https://sepolia.basescan.org/address/0xD4c2D166839a6cCDb9Bf0f3cD292686587Ae9Eb6) |
+| DemoTarget | [0x6bAaC44B3Dc269012829e591d256Ea8d5D8F15Db](https://sepolia.basescan.org/address/0x6bAaC44B3Dc269012829e591d256Ea8d5D8F15Db) |
 | DelegatorAccount (HybridDeleGator proxy) | 0xA7858cbB8be2cD50cc9e04e62eCD58BF86381137 |
 | DelegationManager (MM v1.3.0) | 0xdb9B1e94B5b69Df7e401DDbedE43491141047dB3 |
 
 ## Flow 1 — exact execution (onchain)
 
-Transaction: 0x03197ac7f52ce016449270efc564b1d3ab547e70bdb0bdd4ff0007d136264801
+Transaction: https://sepolia.basescan.org/tx/0x03197ac7f52ce016449270efc564b1d3ab547e70bdb0bdd4ff0007d136264801
 Block: 39881550
 
 What happened:
@@ -33,6 +35,8 @@ Events emitted:
 - RedeemedDelegation from DelegationManager
 
 Status: success
+
+This demonstrates that execution is enforced as a commitment check at redemption, not a policy evaluated by the relayer.
 
 ## Flow 2 — mutated calldata (simulation)
 
