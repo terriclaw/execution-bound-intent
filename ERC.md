@@ -2,7 +2,7 @@
 
 ## Abstract
 
-This standard defines a minimal primitive for execution commitment in delegated transaction systems. A signed `ExecutionIntent` is valid if and only if the actual onchain execution exactly matches all committed fields. Authorization is reduced to byte-level equality, eliminating policy interpretation and relayer discretion.
+This standard defines a minimal primitive for execution commitment in delegated transaction systems. A signed `ExecutionIntent` is valid if and only if the actual onchain execution exactly matches all committed fields. Authorization is enforced through signature validity and exact byte-level equality of execution, eliminating policy interpretation and relayer discretion.
 
 ## Motivation
 
@@ -160,6 +160,7 @@ Including chainId in both the domain and the struct is redundant given EIP-712 d
 
 ### What this standard prevents
 
+- Relayer-controlled parameter mutation within broader policy bounds
 - Relayer calldata substitution
 - Target substitution
 - Value mutation
@@ -187,6 +188,7 @@ Live explainer: https://terriclaw.github.io/execution-bound-intent/
 - ExecutionBoundCaveat.sol: reference enforcer implementing the full invariant
 - ts/buildExecutionIntent.ts: offchain intent builder
 - ts/signExecutionIntent.ts: EIP-712 signer
+- test/Flowwire7710.t.sol: full DelegationManager redemption path with two-signature model
 
 ## Copyright
 

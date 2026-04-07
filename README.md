@@ -144,7 +144,7 @@ beforeHook args (per-redemption):
 
 signer is the address expected to have produced the signature (distinct from _redeemer).
 terms: unused in v1, pass empty bytes.
-mode: accepted but not inspected — v1 assumes single call type.
+mode: inspected for call type; only CALLTYPE_SINGLE is accepted. Delegatecall, batch, static, and unknown call types revert with UnsupportedCallType.
 
 ## Standardization surface
 
@@ -195,32 +195,13 @@ See: [`test/GasBenchmarks.t.sol`](./test/GasBenchmarks.t.sol)
 - replay → `NonceAlreadyUsed` revert
 - non-single call type → `UnsupportedCallType` revert
 
-## Flowwire — full ERC-7710 redemption path
-
-[`test/Flowwire7710.t.sol`](./test/Flowwire7710.t.sol) proves the primitive inside the real MetaMask delegation framework stack — not just at the `beforeHook` boundary.
-
-**Two signatures, kept separate:**
-
-    [Sig 1] Delegator signs delegation via DelegationManager EIP-712 domain
-            -> says who may redeem
-    [Sig 2] Signer signs ExecutionIntent via ExecutionBoundCaveat EIP-712 domain
-            -> says what exact execution is allowed
-
-**Key finding:** args is excluded from the delegation hash by design. The redeemer injects the signed ExecutionIntent at redemption time — but the caveat binds it back to _delegator, target, value, calldata, nonce, and signature validity. The redeemer cannot substitute a different intent.
-
-**Four cases proven through real DelegationManager:**
-- exact execution -> demoTarget.value() == 42
-- mutated calldata -> DataHashMismatch revert
-- replay -> NonceAlreadyUsed revert
-- non-single call type -> UnsupportedCallType revert
-
 ## Integration flow
 
 [`test/IntegrationFlow.t.sol`](./test/IntegrationFlow.t.sol) exercises the same `beforeHook` path that `DelegationManager` calls at redemption time — same args encoding, same `ExecutionLib.encodeSingle` executionCalldata, same mode byte.
 
 Five cases: exact execution passes, mutated calldata reverts, wrong account reverts, nonce lifecycle verified, delegatecall rejected.
 
-This validates enforcement at the DelegationManager boundary. A full live redemption flow (HybridDeleGator + `redeemDelegations`) is the next step.
+This validates enforcement at the DelegationManager boundary directly. For the full real redemption path, see [`test/Flowwire7710.t.sol`](./test/Flowwire7710.t.sol).
 
 ## Setup
 

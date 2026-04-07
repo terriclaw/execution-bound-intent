@@ -15,17 +15,7 @@ Mental model:
 - caveat → enforces the join between them
 - manager → orchestrates the path
 
-## Flowwire — full redemption path
-
-[`test/Flowwire7710.t.sol`](./test/Flowwire7710.t.sol) runs the full DelegationManager.redeemDelegations path with a real HybridDeleGator smart account.
-
-Key architectural detail: args is excluded from the delegation hash (CAVEAT_TYPEHASH only includes enforcer and terms). The redeemer populates delegation.caveats[0].args with abi.encode(intent, signer, signature) at redemption time. The caveat then binds this back to _delegator and exact execution — the redeemer cannot substitute a different intent.
-
-Mental model:
-- delegation signature -> who may redeem
-- intent signature -> what exact execution is allowed
-- caveat -> enforces the join between them
-- manager -> orchestrates the path
+This separation keeps delegation generic ("who may redeem") while binding exact execution only at redemption time.
 
 ## Reference integration test
 
