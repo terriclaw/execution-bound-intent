@@ -68,7 +68,7 @@ contract TestnetDemo is Script {
     }
 
     function _deploy(uint256 delegatorKey) internal {
-        vm.startBroadcast(delegatorKey);
+        vm.startBroadcast();
         caveat = new ExecutionBoundCaveat();
         target = new DemoTarget();
         delegatorAccount = address(new ERC1967Proxy(
@@ -121,7 +121,7 @@ contract TestnetDemo is Script {
         modes[0] = ModeLib.encodeSimpleSingle();
         bytes[] memory ecd = new bytes[](1);
         ecd[0] = execCd;
-        vm.startBroadcast(redeemerKey);
+        vm.startBroadcast();
         IDelegationManager(DM).redeemDelegations(pc, modes, ecd);
         vm.stopBroadcast();
     }
@@ -161,13 +161,11 @@ contract TestnetDemo is Script {
         m[0] = ModeLib.encodeSimpleSingle();
         bytes[] memory ecd = new bytes[](1);
         ecd[0] = ExecutionLib.encodeSingle(address(target), 0, mutCd);
-        vm.startBroadcast(redeemerKey);
         try IDelegationManager(DM).redeemDelegations(pc, m, ecd) {
             console.log("Flow 2: UNEXPECTED SUCCESS");
         } catch {
             console.log("Flow 2: REVERTED as expected (DataHashMismatch)");
         }
-        vm.stopBroadcast();
     }
 
     function _flow3(uint256 delegatorKey, uint256 redeemerKey, bytes memory intentArgs) internal {
@@ -183,13 +181,11 @@ contract TestnetDemo is Script {
         m[0] = ModeLib.encodeSimpleSingle();
         bytes[] memory ecd = new bytes[](1);
         ecd[0] = ExecutionLib.encodeSingle(address(target), 0, cd);
-        vm.startBroadcast(redeemerKey);
         try IDelegationManager(DM).redeemDelegations(pc, m, ecd) {
             console.log("Flow 3: UNEXPECTED SUCCESS");
         } catch {
             console.log("Flow 3: REVERTED as expected (NonceAlreadyUsed)");
         }
-        vm.stopBroadcast();
     }
 
     function _runFlows(uint256 delegatorKey, uint256 redeemerKey, uint256 signerKey) internal {
