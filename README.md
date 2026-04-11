@@ -212,6 +212,37 @@ Flow 1 (exact execution) is live onchain. Flows 2 (mutation) and 3 (replay) reve
 - replay → `NonceAlreadyUsed` revert
 - non-single call type → `UnsupportedCallType` revert
 
+## Intended default path
+
+For production use, scope execution to an explicit execution context — a specific manager or redemption authority — rather than relying on globally open nonce spaces.
+
+The primitive supports this through the `authorizedSigner` in `terms` (framework port) and the two-signature model: delegation defines who may redeem, ExecutionIntent defines what must execute.
+
+See [`docs/INTEGRATION.md`](./docs/INTEGRATION.md) for the reference integration pattern.
+
+## Canonical flow
+
+The most direct path through the primitive:
+
+- [`test/Flowwire7710.t.sol`](./test/Flowwire7710.t.sol) — full ERC-7710 redemption path through the real MetaMask DelegationManager
+
+This is the file to read first if you want to understand the intended end-to-end usage.
+
+## Related research
+
+A companion repo explores the broader design space that informed the canonical path:
+
+https://github.com/terriclaw/execution-bound-intent-global-replay
+
+It covers:
+- replay semantics and nonce scoping models
+- ManagerBoundIntent vs GlobalIntent type separation
+- why intent type must survive relayer, integration, ops, and schema boundaries
+- executable proofs of failure modes at each layer
+
+This repo (execution-bound-intent) focuses on the primitive itself.
+The research repo explains why the canonical path is the right one.
+
 ## Integration flow
 
 [`test/IntegrationFlow.t.sol`](./test/IntegrationFlow.t.sol) exercises the same `beforeHook` path that `DelegationManager` calls at redemption time — same args encoding, same `ExecutionLib.encodeSingle` executionCalldata, same mode byte.
