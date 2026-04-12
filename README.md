@@ -90,7 +90,7 @@ Signature domain includes chainId and verifying contract address, preventing cro
     3. intent + sig passed as caveat args at redemption
     4. execution submitted via DelegationManager
     5. caveat decodes real calldata via ExecutionLib.decodeSingle()
-    6. caveat recomputes hash, verifies signature, then consumes nonce
+    6. caveat recomputes hash, consumes nonce, then verifies signature (CEI)
     7. equality holds -> execute; else revert
 
 ## The struct
@@ -115,7 +115,7 @@ At redemption, ExecutionBoundCaveat checks in order:
 - intent.deadline == 0 OR block.timestamp <= intent.deadline
 - usedNonces[account][signer][nonce] == false
 - valid EOA or ERC-1271 signature over the EIP-712 digest of ExecutionIntent
-- nonce is consumed only after successful signature verification (prevents griefing via invalid signature nonce consumption)
+- nonce is consumed before signature verification (CEI compliance)
 
 Any mismatch reverts. No interpretation. No flexibility.
 
