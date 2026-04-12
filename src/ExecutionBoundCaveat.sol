@@ -102,11 +102,11 @@ contract ExecutionBoundCaveat {
         if (usedNonces[intent.account][signer][intent.nonce])
             revert NonceAlreadyUsed(intent.account, signer, intent.nonce);
 
-        if (!SignatureChecker.isValidSignatureNow(signer, intent.digest(DOMAIN_SEPARATOR), signature))
-            revert InvalidSignature();
-
         usedNonces[intent.account][signer][intent.nonce] = true;
         emit NonceConsumed(intent.account, signer, intent.nonce);
+
+        if (!SignatureChecker.isValidSignatureNow(signer, intent.digest(DOMAIN_SEPARATOR), signature))
+            revert InvalidSignature();
     }
 
     /// @notice No-op afterHook — v1 only enforces in beforeHook.
