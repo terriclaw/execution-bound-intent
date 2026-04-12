@@ -222,11 +222,13 @@ See [`docs/INTEGRATION.md`](./docs/INTEGRATION.md) for the reference integration
 
 ## Canonical flow
 
-The most direct path through the primitive:
+Start here:
 
-- [`test/Flowwire7710.t.sol`](./test/Flowwire7710.t.sol) — full ERC-7710 redemption path through the real MetaMask DelegationManager
+- [`test/CanonicalFlow.t.sol`](./test/CanonicalFlow.t.sol) — minimal step-by-step usage path, no framework complexity
 
-This is the file to read first if you want to understand the intended end-to-end usage.
+Shows: build intent -> sign -> enforce -> execute -> verify. Easy to copy.
+
+For proof the primitive survives the real MetaMask delegation stack, see [`test/Flowwire7710.t.sol`](./test/Flowwire7710.t.sol).
 
 ## Related research
 
