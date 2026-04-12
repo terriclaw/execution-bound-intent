@@ -214,7 +214,7 @@ Flow 1 (exact execution) is live onchain. Flows 2 (mutation) and 3 (replay) reve
 
 ## Intended default path
 
-For production use, scope execution to an explicit execution context — a specific manager or redemption authority — rather than relying on globally open nonce spaces.
+The intended path: scope execution to an explicit execution context — a specific manager or redemption authority.
 
 The primitive supports this through the `authorizedSigner` in `terms` (framework port) and the two-signature model: delegation defines who may redeem, ExecutionIntent defines what must execute.
 
